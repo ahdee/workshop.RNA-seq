@@ -1,0 +1,266 @@
+#!/usr/bin/env cgpipe
+# takes in raw seqeunces and does the following 
+# 1. fastqc raw 
+# 2. trim
+# 3. aligns 
+# 4. fastqc AND simultaneously do UMEM from the docker 
+# 5. because we are dealing with raw seqeunces I'm giong to add fusioncatcher in here as well. 
+
+#Required inputs: Warning FASTQ needs to be untrimmed
+#  --fq1   First of pair in FASTQ format
+#  --fq2   Second of pair in FASTQ format
+#  --outdir           The name of the output directory
+#  --sample   This is what will be used to prefix all outputs! If not provided it will extract this from the file up till _R1 
+
+# resources required, these are not optional
+# gtf	this a file to the gtf used in pizzly
+# trim.adapter # this is for trimmotic. 
+
+
+# optional 
+# trim.exe
+
+#History:
+
+######################### NONE OPTIONAL 
+if !fq && !fq1
+    print "ERROR: You need to specify a FASTQ input file"
+    exit 1
+endif
+
+if !gtf
+    print "ERROR: You need to specify a gtf input file"
+    exit 1
+endif
+
+if !star.index
+    print "ERROR: You need to specify a star.index input file"
+    exit 1
+endif
+
+if !outdir
+    print "ERROR: You need to specify a outdir"
+    exit 1
+endif
+
+if !trim.adapter
+    print "ERROR: You need to specify a trim.adapter"
+    exit 1
+endif
+
+if !toil.index
+	print "ERROR: You need to specify a toil.index"
+	exit 1
+endif
+
+######################## OPTIONAL 
+# basename removes leading directory name 
+if !sample
+	sample=$(basename "${fq1}" | sed -e 's/.gz$//' | sed -e 's/_R1.fastq//' |  sed -e 's/_R1.fq//')
+endif
+
+##### check for local envs
+if !staralign.env
+	staralign.env="/asclab/users/leea3/bin/configs/staralign.config"
+endif
+
+if !trim.exe
+	trim.exe="/asclab/users/leea3/bin/Trimmomatic-0.39/trimmomatic-0.39.jar"
+endif
+
+
+
+
+###################################################### Finished checking 
+### create sub directory for outputs 
+qc.dir = "${outdir}QC/"
+fastqc_1.dir="${qc.dir}fastqc.raw/"
+fastqc_2.dir="${qc.dir}fastqc.trim/"
+ngs.dir="${qc.dir}ngsutil/"
+umend.dir="${qc.dir}umend/"
+umend.dir.tmp="${qc.dir}umend/tmp2/"
+trim.dir="${outdir}TRIM/"
+staralign.dir="${outdir}STAR.ALIGN/"
+fusion.dir="${outdir}fusion/"
+fc.dir="${fusion.dir}fusioncatcher/"
+fc.dir.tmp="${fc.dir}tmp/"
+toil.dir="${outdir}TOIL/"
+
+######################################################
+### output files 
+qc1.results="${fastqc_1.dir}${sample}_R1_fastqc.html"
+trim.fq1="${trim.dir}${sample}_1.fq.gz"
+trim.fq2="${trim.dir}${sample}_2.fq.gz"
+
+
+
+staralign.bam="${staralign.dir}${sample}Aligned.sortedByCoord.out.bam"
+staralign.bai="${staralign.dir}${sample}Aligned.sortedByCoord.out.bam.bai"
+staralign.count="${staralign.dir}${sample}ReadsPerGene.out.tab"
+ngs.stat="${ngs.dir}${sample}.stats.txt"
+umend.stat="${umend.dir}${sample}.QC.txt"
+
+
+fc.out="${fc.dir}${sample}_summary_candidate_fusions.txt"
+
+toil.out="${toil.dir}${sample}.tar.gz"
+
+######################################################
+############# cmd commands
+fastqc1.cmd="fastqc ${fq1} ${fq2} --outdir=${fastqc_1.dir}"
+trim.cmd="java -Xmx15g -jar ${trim.exe} PE ${fq1} ${fq2} -baseout ${trim.dir}${sample}.fq.gz ILLUMINACLIP:${trim.adapter}:2:30:10 LEADING:20 TRAILING:20 SLIDINGWINDOW:4:15 MINLEN:20 -threads 4"
+
+staralign.cmd="STAR --genomeDir ${star.index} --runThreadN 8 --readFilesIn ${trim.fq1} ${trim.fq2} --readFilesCommand zcat --outFileNamePrefix ${staralign.dir}${sample} --outSAMtype BAM SortedByCoordinate --quantMode GeneCounts --sjdbGTFfile ${gtf} --twopassMode Basic"
+
+ngs.cmd="ngsutilsj bam-stats --silent --unique --gtf ${gtf} -o ${ngs.stat} ${staralign.bam}"
+umend.cmd="docker run --rm --name ${sample}_ -v ${umend.dir.tmp}:/tmp -v ${umend.dir}:/data -v ${staralign.bam}:/data/${sample}.rnaAligned.sortedByCoord.out.bam: simplitia/hmem:1.2 runQC.sh ${sample} hg38"
+
+fc.cmd="docker run --rm -v /asclab/projects/asclab/alex/docker.stuff/:/opt -v ${fq1}:/fusionout/reads_1.fq.gz -v ${fq2}:/fusionout/reads_2.fq.gz -v ${fc.dir}:/fusionfinal/ -v ${fc.dir.tmp}:/fusionlist/ simplitia/fusioncatch:1.1.b sh /usr/local/bin/go.sh ${sample} 4"
+
+
+#### toil requires a bit of finesse 
+toil.base=$(dirname  "${fq1}")
+toil.1=$(basename  "${fq1}")
+toil.2=$(basename  "${fq2}")
+toil.cmd="docker run --rm -v ${toil.dir}:${toil.dir} -v ${toil.index}:/inputs -v /var/run/docker.sock:/var/run/docker.sock -v  ${toil.base}:/samples quay.io/ucsc_cgl/rnaseq-cgl-pipeline:3.4.0a1-1.10.3 --star '/inputs/starIndex_hg38_no_alt.tar.gz' --rsem '/inputs/rsem_ref_hg38_no_alt.tar.gz' --kallisto '/inputs/kallisto_hg38.idx' --sample-paired '/samples/${toil.1},/samples/${toil.2}' --work_mount ${toil.dir} --output-basename ${sample} --cores 4"
+
+
+# basename
+######### end commands 
+
+runid ?= "run.${sample}.$(date +%Y%m%d-%H%M)"
+cgpipe.log = "logs/init-${runid}.log"
+cgpipe.loglevel = 1
+cgpipe.joblog = "cgpipe_jobs/outfile_${sample}.txt"
+
+job.stdout = "logs/"
+job.stderr = "logs/"
+job.env = true
+
+
+####################### print stuff for testing 
+#print "\n\n ${sample} \n QCR: ${qc1.results} \n ${staralign.env} \n ${umend.dir}\n trim: ${trim.cmd}\n UMEND: ${umend.cmd} AND file: ${umend.stat}\n\n FC: ${fc.cmd} \n FCOUT:  ${fc.out} \n"
+print "\n\n ${toil.base} ${toil.1} ${toil.2}\n\n ${toil.cmd} \n ${toil.out}"
+
+###################### 
+__setup__::
+    <% job.shexec=true %>
+    mkdir -p ${qc.dir}
+	mkdir -p ${fastqc_1.dir}
+	mkdir -p ${fastqc_2.dir}
+	mkdir -p ${ngs.dir}
+	mkdir -p ${trim.dir}
+	mkdir -p ${ngs.dir}
+	mkdir -p ${staralign.dir}
+	mkdir -p ${umend.dir}
+	mkdir -p ${fusion.dir}
+	mkdir -p ${fc.dir}
+	mkdir -p ${fc.dir.tmp}
+	mkdir -p ${umend.dir.tmp}
+	mkdir -p ${toil.dir}
+
+__pre__::
+    echo "Outputs: $>"
+    echo "Inputs: $<"
+    echo -n "Start: "
+    date
+
+
+__post__::
+    echo -n "End: "
+    date
+
+# put any results you want to generate here. If the file exists then it will be ignore. 
+
+all: "${qc1.results} ${trim.fq1} ${staralign.count} ${staralign.bam} ${staralign.bai} ${ngs.stat} ${umend.stat} ${fc.out} ${toil.out}"
+
+#################################### SUBMIT JOBS
+## qc raw 
+${qc1.results}: ${fq2} ${fq1}
+    <% 
+        job.name = "FC1.${sample}"
+        job.time = "2:00:00"
+        job.mem = "6G"
+		job.procs = 1
+    %>
+    ${fastqc1.cmd}
+
+# trimming 
+${trim.fq1}: ${fq2} ${fq1}
+    <% 
+        job.name = "TR.${sample}"
+        job.time = "10:00:00"
+        job.mem = "20G"
+		job.procs = 4
+    %>
+    ${trim.cmd}
+	mv ${trim.dir}${sample}_1P.fq.gz ${trim.fq1}
+	mv ${trim.dir}${sample}_2P.fq.gz ${trim.fq2}
+	rm ${trim.dir}${sample}_1U.fq.gz
+	rm ${trim.dir}${sample}_2U.fq.gz
+
+# STAR
+${staralign.count} ${staralign.bam}: ${trim.fq1} ${trim.fq2}
+    <% 
+        job.name = "ST.${sample}"
+        job.time = "20:00:00"
+        job.mem = "65G"
+		job.procs = 8
+    %>
+	source ${staralign.env}
+	${staralign.cmd}
+
+# samtools 
+${staralign.bai}: ${staralign.bam}
+    <% 
+        job.name = "BAI.${sample}"
+        job.time = "20:00:00"
+        job.mem = "6G"
+		job.procs = 1
+    %>
+	source ${staralign.env}
+	samtools index ${staralign.bam}
+	
+# ngsutils 
+${ngs.stat}: ${staralign.bam}
+    <% 
+        job.name = "NGS.${sample}"
+        job.time = "20:00:00"
+        job.mem = "35G"
+		job.procs = 1
+    %>
+	source ${staralign.env}
+	${ngs.cmd}
+
+${umend.stat}: ${staralign.bam}
+    <% 
+        job.name = "UM.${sample}"
+        job.time = "72:00:00"
+        job.mem = "70G"
+		job.procs = 1
+    %>
+	source ${staralign.env}
+	docker ps -a
+	${umend.cmd}
+	rm -r ${umend.dir.tmp}
+
+# fusioncatcher
+${fc.out}: ${fq2} ${fq1}
+    <% 
+        job.name = "FC.${sample}"
+        job.time = "80:00:00"
+        job.mem = "75G"
+		job.procs = 4
+    %>
+    ${fc.cmd}
+	rm -r ${fc.dir.tmp}
+
+# toil rna.seq ucsc
+${toil.out}: ${fq2} ${fq1}
+    <% 
+        job.name = "FC.${sample}"
+        job.time = "80:00:00"
+        job.mem = "75G"
+		job.procs = 4
+    %>
+    ${toil.cmd}	
