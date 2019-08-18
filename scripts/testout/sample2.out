@@ -1,0 +1,14 @@
+this is where my seqs are at: /asclab/users/leea3/workshop.RNA-seq/seq/
+this is where my outputs will be: /asclab/users/leea3/workshop.RNA-seq/seq/testout/
+Analysis complete for test_R1.fastq.gz
+Analysis complete for test_R2.fastq.gz
+Aug 18 13:02:42 ..... started STAR run
+Aug 18 13:02:43 ..... loading genome
+Aug 18 13:02:56 ..... processing annotations GTF
+Aug 18 13:03:11 ..... inserting junctions into the genome indices
+Aug 18 13:04:29 ..... started 1st pass mapping
+Aug 18 13:11:35 ..... finished 1st pass mapping
+Aug 18 13:11:37 ..... inserting junctions into the genome indices
+Aug 18 13:13:38 ..... started mapping
+Aug 18 13:25:21 ..... started sorting BAM
+Aug 18 13:26:29 ..... finished successfully
