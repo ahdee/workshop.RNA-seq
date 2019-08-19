@@ -1,4 +1,5 @@
 # login to HPC
+# ssh leea3@169.230.134.181
 # clone git clone https://github.com/ahdee/workshop.RNA-seq.git
 cd workshop.RNA-seq
 pwd
@@ -35,6 +36,8 @@ mv ./full_length.tab ./fun.tab # rename or move
 # extra benefit can copy files from outside 
 rsync -avP /asclab/data1/backup/projects/spcg/working/alex.rna/DATA/UCSF_747/BC6/raw/* ./
 # if external then normally its username@<host>:<dir/target>
+# when transfering large files its necessary to confirm that the file was no corrupted
+md5sum full_length.tab
 cd ..
 rm –rf practice # be careful of –rf there are interesting stories out there
 # storage viewing 
@@ -88,6 +91,8 @@ echo "aaaaE_KRASaaaaaEEEEE" | sed s/aE.*?//
 head -25 full_length.tab | sed s/E/_/g
 # fix this with awk 
 head -25 full_length.tab | awk '{ gsub("E","_",$2); print $2 "\t" $1 }' | less -S
+# search file for files
+find ./ -iname "*.sh"
 # now lets take a peak at some files we need to know about
 # what is a fastq 
 cd ~/workshop.RNA-seq/seq
