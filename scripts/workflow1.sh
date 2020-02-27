@@ -27,7 +27,7 @@ mkdir -p $output
 echo "this is where my seqs are at: $base"
 echo "this is where my outputs will be: $output"
 echo "this is where my input files are ${in1} ${in2}"
-echo "this is we are calling it ${outfile}"
+echo "this is what I'm calling it ${outfile}"
 
 
 
