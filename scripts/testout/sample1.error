@@ -1,7 +1,6 @@
 STAR version 2.5.3a loaded.
 ngsutilsj version 0.4.7 loaded.
 samtools version 1.2 loaded.
-/var/slurmd/spool/job06087/slurm_script: line 21: trim.adap=/asclab/users/leea3/bin/Trimmomatic-0.39/adapters/TruSeq3-PE.fa: No such file or directory
 Started analysis of test_R1.fastq.gz
 Approx 5% complete for test_R1.fastq.gz
 Approx 10% complete for test_R1.fastq.gz
@@ -43,11 +42,11 @@ Approx 85% complete for test_R2.fastq.gz
 Approx 90% complete for test_R2.fastq.gz
 Approx 95% complete for test_R2.fastq.gz
 TrimmomaticPE: Started with arguments:
- /asclab/users/leea3/workshop.RNA-seq/seq/test_R1.fastq.gz /asclab/users/leea3/workshop.RNA-seq/seq/test_R2.fastq.gz -baseout /asclab/users/leea3/workshop.RNA-seq/seq/testout/test_s1.fq.gz ILLUMINACLIP:/asclab/users/leea3/bin/Trimmomatic-0.39/adapters/TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:20 -threads 6
-Using templated Output files: /asclab/users/leea3/workshop.RNA-seq/seq/testout/test_s1_1P.fq.gz /asclab/users/leea3/workshop.RNA-seq/seq/testout/test_s1_1U.fq.gz /asclab/users/leea3/workshop.RNA-seq/seq/testout/test_s1_2P.fq.gz /asclab/users/leea3/workshop.RNA-seq/seq/testout/test_s1_2U.fq.gz
+ /asclab/users/leea3/workshop.RNA-seq/seq/test_R1.fastq.gz /asclab/users/leea3/workshop.RNA-seq/seq/test_R2.fastq.gz -baseout /asclab/users/leea3/workshop.RNA-seq/seq/testout/tt1.fq.gz ILLUMINACLIP:/asclab/users/leea3/bin/Trimmomatic-0.39/adapters/TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:20 -threads 6
+Using templated Output files: /asclab/users/leea3/workshop.RNA-seq/seq/testout/tt1_1P.fq.gz /asclab/users/leea3/workshop.RNA-seq/seq/testout/tt1_1U.fq.gz /asclab/users/leea3/workshop.RNA-seq/seq/testout/tt1_2P.fq.gz /asclab/users/leea3/workshop.RNA-seq/seq/testout/tt1_2U.fq.gz
 Using PrefixPair: 'TACACTCTTTCCCTACACGACGCTCTTCCGATCT' and 'GTGACTGGAGTTCAGACGTGTGCTCTTCCGATCT'
 ILLUMINACLIP: Using 1 prefix pairs, 0 forward/reverse sequences, 0 forward only sequences, 0 reverse only sequences
 Quality encoding detected as phred33
-Input Read Pairs: 39950279 Both Surviving: 38785632 (97.08%) Forward Only Surviving: 1134750 (2.84%) Reverse Only Surviving: 24245 (0.06%) Dropped: 5652 (0.01%)
+Input Read Pairs: 64928830 Both Surviving: 63578356 (97.92%) Forward Only Surviving: 1298645 (2.00%) Reverse Only Surviving: 40406 (0.06%) Dropped: 11423 (0.02%)
 TrimmomaticPE: Completed successfully
 Loading GTF annotation: /asclab/data1/backup/projects/spcg/resources/indexes/GRCh38.p5/gencode.v24.annotation.gtf... done

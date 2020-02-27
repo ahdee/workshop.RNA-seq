@@ -1,0 +1,82 @@
+Total-reads:	70638276
+Mapped-reads:	70638276
+Unmapped-reads:	0
+Multiple-mapped-reads:	13460214
+Uniquely-mapped-reads:	57178062
+Total-bases:	8617660223
+Ref-length:	3088286401
+Q30-pct:	96.81%
+
+[Flags]
+Multiple fragments (0x1):	70638276
+All fragments aligned (0x2):	70537176
+Next unmapped (0x8):	101100
+Reverse complimented (0x10):	40511354
+Next reverse complimented (0x20):	30081021
+First fragment (0x40):	70638276
+Secondary alignment (0x100):	8845476
+
+[References]
+chr1	5084302
+chr2	4456560
+chr3	2607693
+chr4	1479086
+chr5	2056520
+chr6	3061860
+chr7	2025594
+chr8	2395419
+chr9	2141635
+chr10	1653998
+chr11	3186334
+chr12	3041006
+chr13	946982
+chr14	1469974
+chr15	1705529
+chr16	2190832
+chr17	3577781
+chr18	737704
+chr19	4243848
+chr20	1320788
+chr21	601012
+chr22	1347682
+chrM	3872327
+chrX	1972198
+chrY	1398
+
+[Gene regions]
+Coding                          	112559
+Junction                        	14017
+5'UTR                           	175705
+3'UTR                           	121410
+Non-coding exon                 	61992
+Non-coding junction             	28815
+Coding intron                   	408654
+5'UTR intron                    	54239
+3'UTR intron                    	11336
+Non-coding intron               	89339
+Intergenic                      	1398769
+Mitochondrial                   	3869238
+Coding (anti-sense)             	14682189
+Junction (anti-sense)           	12367850
+5'UTR (anti-sense)              	871746
+3'UTR (anti-sense)              	16318387
+Non-coding exon (anti-sense)    	1228968
+Non-coding junction (anti-sense)	670315
+Coding intron (anti-sense)      	3705812
+5'UTR intron (anti-sense)       	380644
+3'UTR intron (anti-sense)       	108668
+Non-coding intron (anti-sense)  	419350
+
+Orientation	RF
+Sense      	1078066
+Anti-sense 	50753929
+
+Exonic     	46139455
+Intronic   	4614474
+
+Junction   	13038165
+
+Sense/anti-sense ratio     	-47.08
+Exonic/intronic ratio      	10.00
+Exonic/genomic ratio       	32.99
+Non-junction/junction ratio	2.54
