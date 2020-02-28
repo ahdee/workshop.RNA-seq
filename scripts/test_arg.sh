@@ -1,15 +1,4 @@
 #!/bin/bash
-#SBATCH --job-name=submit1
-#SBATCH --mem=70GB
-#SBATCH --ntasks=6
-#SBATCH --time=10:00:00
-#SBATCH --error=sample1.error
-#SBATCH --output=sample2.out
-#SBATCH --chdir ./testout
-
-module load STAR/2.5.3a
-module load ngsutilsj/0.4.7
-module load samtools/1.2
 
 base="$1" # setting up my base directory
 output="$2"
@@ -28,3 +17,6 @@ echo "this is where my seqs are at: $base"
 echo "this is where my outputs will be: $output"
 echo "this is where my input files are ${in1} ${in2}"
 echo "this is what I'm calling it ${outfile}"
+
+
+gunzip -c ${in1} | head -4000 | grep 0:GTGAAA | wc -l

@@ -130,9 +130,21 @@ squeue -u <user>
 # final real world example 
 nano run1.sh
 
+### Wrk2 
+# submit simple job directly
+cd ~/workshop.RNA-seq/scripts
+JOBID=$(sbatch --time=1:00:00 \
+-e ./test/s1.error \
+-o ./test/s1.o \
+--mem=1GB \
+-n 1 --wrap \
+'gunzip -c ~/workshop.RNA-seq/seq/test_R1.fastq.gz | head -4000 | grep 0:GTGAAA | wc -l; echo "hello world";sleep 180' \
+| awk '{print $4}')
 
+squeue -u <username> | tail 
 
-
+# now submit a job with a script 
+sbatch job1.sh
 
 
 
